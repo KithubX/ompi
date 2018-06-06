@@ -73,6 +73,7 @@ int opal_leave_pinned = -1;
 bool opal_leave_pinned_pipeline = false;
 bool opal_abort_print_stack = false;
 int opal_abort_delay = 0;
+bool opal_unsafe_progress = false;
 
 static bool opal_register_done = false;
 
@@ -121,7 +122,7 @@ int opal_register_params(void)
         opal_signal_string = string;
         ret = mca_base_var_register ("opal", "opal", NULL, "signal",
 				     "Comma-delimited list of integer signal numbers to Open MPI to attempt to intercept.  Upon receipt of the intercepted signal, Open MPI will display a stack trace and abort.  Open MPI will *not* replace signals if handlers are already installed by the time MPI_INIT is invoked.  Optionally append \":complain\" to any signal number in the comma-delimited list to make Open MPI complain if it detects another signal handler (and therefore does not insert its own).",
-				     MCA_BASE_VAR_TYPE_STRING, NULL, 0, MCA_BASE_VAR_FLAG_SETTABLE,
+                     MCA_BASE_VAR_TYPE_STRING, NULL, 0, MCA_BASE_VAR_FLAG_SETTABLE,
 				     OPAL_INFO_LVL_3, MCA_BASE_VAR_SCOPE_LOCAL,
 				     &opal_signal_string);
         free (string);
@@ -357,6 +358,13 @@ int opal_register_params(void)
             "Store SHELL env variables from amca conf file",
             MCA_BASE_VAR_TYPE_STRING, NULL, 0, MCA_BASE_VAR_FLAG_INTERNAL, OPAL_INFO_LVL_3,
             MCA_BASE_VAR_SCOPE_READONLY, &mca_base_env_list_internal);
+
+    /* allow multiple threads to go into opal_progress() */
+    (void)mca_base_var_register ("opal", "opal", NULL, "unsafe_progress",
+            "allow all threads to perform progression. This might increase multithreaded "
+            "performance. Only use with thread-safe component." ,
+            MCA_BASE_VAR_TYPE_BOOL, NULL, 0, MCA_BASE_VAR_FLAG_SETTABLE, OPAL_INFO_LVL_8,
+            MCA_BASE_VAR_SCOPE_LOCAL, &opal_unsafe_progress);
 
     /* The ddt engine has a few parameters */
     ret = opal_datatype_register_params();

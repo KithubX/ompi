@@ -25,6 +25,8 @@
 
 BEGIN_C_DECLS
 
+extern bool opal_unsafe_progress;
+
 typedef struct ompi_wait_sync_t {
     int32_t count;
     int32_t status;

@@ -26,6 +26,9 @@ static ompi_wait_sync_t* wait_sync_list = NULL;
 
 int ompi_sync_wait_mt(ompi_wait_sync_t *sync)
 {
+    if (opal_unsafe_progress) {
+        return sync_wait_st(sync);
+    }
     /* Don't stop if the waiting synchronization is completed. We avoid the
      * race condition around the release of the synchronization using the
      * signaling field.
